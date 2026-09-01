@@ -11,17 +11,18 @@ if (reduced || !('IntersectionObserver' in window)) {
   document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 }
 
-// Rebuild the specialties strip as two identical, evenly divided groups.
-// This guarantees a seamless loop with no empty gap at the end of a cycle.
+// Continuous specialties strip with equal visual spacing and no large gaps.
 const marqueeTrack = document.querySelector('.marquee-track');
 if (marqueeTrack) {
   const specialties = ['MECHAS', 'COLORAÇÃO', 'MICROPIGMENTAÇÃO', 'SOBRANCELHAS'];
+  const repeatedSpecialties = [...specialties, ...specialties];
+
   const buildGroup = (hidden = false) => {
     const group = document.createElement('div');
     group.className = 'marquee-group';
     if (hidden) group.setAttribute('aria-hidden', 'true');
 
-    specialties.forEach((label) => {
+    repeatedSpecialties.forEach((label) => {
       const item = document.createElement('span');
       item.className = 'marquee-item';
       item.textContent = label;
@@ -48,20 +49,19 @@ if (marqueeTrack) {
       will-change: transform;
     }
     .marquee-group {
-      width: max(100vw, 760px);
-      flex: 0 0 max(100vw, 760px);
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      flex: 0 0 auto;
+      display: flex;
       align-items: center;
+      width: max-content;
     }
     .marquee-item {
       min-width: 0 !important;
-      display: flex;
+      flex: 0 0 auto;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: clamp(24px, 3vw, 52px);
-      padding: 0 clamp(10px, 1.5vw, 24px);
-      text-align: center;
+      white-space: nowrap;
+      padding-left: clamp(22px, 2.4vw, 38px);
+      gap: clamp(22px, 2.4vw, 38px);
     }
     .marquee-item i {
       margin: 0;
@@ -72,6 +72,12 @@ if (marqueeTrack) {
     @keyframes marquee-seamless {
       from { transform: translateX(0); }
       to { transform: translateX(-50%); }
+    }
+    @media (max-width:560px) {
+      .marquee-item {
+        padding-left: 18px;
+        gap: 18px;
+      }
     }
     @media (prefers-reduced-motion: reduce) {
       .marquee-track { animation: none; }
