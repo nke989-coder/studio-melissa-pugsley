@@ -60,7 +60,7 @@ if (marqueeTrack) {
     requestAnimationFrame(() => {
       const groupWidth = groupA.getBoundingClientRect().width;
       marqueeTrack.style.setProperty('--marquee-distance', `${groupWidth}px`);
-      marqueeTrack.style.animation = reduced ? 'none' : 'marquee-seamless 36s linear infinite';
+      marqueeTrack.style.animation = reduced ? 'none' : 'marquee-seamless 52s linear infinite';
     });
   };
 
