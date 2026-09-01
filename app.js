@@ -1,4 +1,20 @@
 document.getElementById('year').textContent = new Date().getFullYear();
+
+// Replace diagonal arrow characters with a consistent SVG icon so iOS/Android
+// never render them as blue emoji buttons. Wrapper elements are preserved so
+// the existing desktop spacing and colors keep working.
+const arrowSvg = `
+  <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false" style="display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round">
+    <path d="M5 15 15 5"></path>
+    <path d="M8 5h7v7"></path>
+  </svg>`;
+
+document.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
+  if (el.textContent.trim() === '↗') {
+    el.innerHTML = arrowSvg;
+  }
+});
+
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (reduced || !('IntersectionObserver' in window)) {
   document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
