@@ -94,6 +94,7 @@
   setMeta('description', description);
   setMeta('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
   setMeta('googlebot', 'index, follow, max-image-preview:large');
+  setMeta('referrer', 'strict-origin-when-cross-origin');
   setMeta('og:title', title, true);
   setMeta('og:description', description, true);
   setMeta('og:type', 'website', true);
@@ -113,6 +114,26 @@
     document.head.appendChild(canonical);
   }
   canonical.href = siteUrl;
+
+  const footerBottom = document.querySelector('.footer-bottom');
+  if (footerBottom && !footerBottom.querySelector('.legal-nav')) {
+    const legalNav = document.createElement('nav');
+    legalNav.className = 'legal-nav';
+    legalNav.setAttribute('aria-label', 'Políticas do site');
+    legalNav.innerHTML = `
+      <a href="./politica-de-privacidade.html">Privacidade</a>
+      <span aria-hidden="true">·</span>
+      <a href="./politica-de-cookies.html">Cookies</a>`;
+    footerBottom.insertBefore(legalNav, footerBottom.querySelector('.atlas-credit'));
+  }
+
+  if (!document.querySelector('script[data-cookie-notice]')) {
+    const cookieScript = document.createElement('script');
+    cookieScript.src = './cookie-consent.js';
+    cookieScript.defer = true;
+    cookieScript.dataset.cookieNotice = 'true';
+    document.body.appendChild(cookieScript);
+  }
 
   const schema = {
     '@context': 'https://schema.org',
