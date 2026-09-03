@@ -29,9 +29,8 @@
   }
 
   // The gallery pauses while it is being touched/dragged or while one of its
-  // cards owns keyboard focus. Release that pointer-generated focus as soon as
-  // the visitor leaves/releases the gallery so the automatic loop resumes
-  // immediately without requiring an extra click elsewhere.
+  // cards owns keyboard focus. Release pointer-generated focus immediately so
+  // the automatic loop resumes as soon as the visitor releases/leaves it.
   const galleryViewport = document.querySelector('.results-gallery-viewport');
   if (galleryViewport) {
     const releasePointerFocus = () => {
@@ -47,6 +46,31 @@
     });
     galleryViewport.addEventListener('pointercancel', releasePointerFocus);
     galleryViewport.addEventListener('touchend', releasePointerFocus, { passive: true });
+
+    // Desktop compatibility: pointer capture used by the draggable carousel can
+    // retarget the native click to the viewport instead of the photo button.
+    // On a short mouse press (no drag), re-dispatch a clean click to the card
+    // under the pointer so the existing lightbox opens normally. Real drags are
+    // ignored, preserving manual carousel navigation.
+    let desktopPress = null;
+    galleryViewport.addEventListener('pointerdown', (event) => {
+      if (event.pointerType !== 'mouse' || event.button !== 0) return;
+      const card = event.target.closest('.result-card');
+      desktopPress = card ? { x: event.clientX, y: event.clientY, card } : null;
+    }, true);
+
+    galleryViewport.addEventListener('pointerup', (event) => {
+      if (event.pointerType !== 'mouse' || !desktopPress) return;
+      const press = desktopPress;
+      desktopPress = null;
+      const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y);
+      if (moved > 6) return;
+      const card = document.elementFromPoint(event.clientX, event.clientY)?.closest('.result-card') || press.card;
+      if (!card) return;
+      requestAnimationFrame(() => card.click());
+    }, true);
+
+    galleryViewport.addEventListener('pointercancel', () => { desktopPress = null; }, true);
   }
 
   const siteUrl = 'https://nke989-coder.github.io/studio-melissa-pugsley/';
