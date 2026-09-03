@@ -1,0 +1,119 @@
+/* Final visual refinements — Melissa Pugsley */
+.maps-button {
+  width: 64px !important;
+  min-height: 64px !important;
+  display: inline-flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px !important;
+  border: 1px solid rgba(255,255,255,.34) !important;
+  background: rgba(255,255,255,.035) !important;
+  color: #f4eee7 !important;
+  transition: background .22s ease, border-color .22s ease, transform .22s ease, color .22s ease !important;
+}
+.maps-button:hover,
+.maps-button:focus-visible {
+  background: rgba(255,255,255,.11) !important;
+  border-color: rgba(255,255,255,.58) !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+}
+.maps-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #f0c9ba;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.maps-button span {
+  font-size: 8px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.maps-button .maps-pin,
+.maps-button b { display: none !important; }
+
+footer {
+  grid-template-columns: minmax(330px,1.6fr) minmax(250px,.9fr) minmax(180px,.7fr) !important;
+  column-gap: clamp(48px,7vw,110px) !important;
+  align-items: start;
+}
+.footer-brand { justify-content: flex-start; }
+.footer-contact,
+footer > div:nth-of-type(3) {
+  justify-self: center;
+  width: min(100%,300px);
+}
+footer > div:nth-of-type(3) { padding-top: 0; }
+.footer-contact > p,
+footer > div:nth-of-type(3) > p { margin-bottom: 14px; }
+.footer-contact-row {
+  min-height: 54px !important;
+  grid-template-columns: minmax(0,1fr) 38px !important;
+  gap: 14px !important;
+}
+.contact-meta {
+  min-width: 0;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 1px !important;
+}
+.contact-meta strong {
+  color: #d88a6c;
+  font-size: 9px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.contact-meta span {
+  color: #eee4dd;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.contact-action {
+  border-color: rgba(216,138,108,.5) !important;
+  color: #d88a6c !important;
+}
+.contact-action:hover,
+.contact-action:focus-visible {
+  background: #b9684e !important;
+  border-color: #b9684e !important;
+  color: #fff !important;
+}
+footer > div:nth-of-type(3) .footer-link {
+  min-height: 54px;
+  align-items: center;
+}
+footer > div:nth-of-type(3) .footer-link span {
+  font-size: 13px;
+}
+footer > div:nth-of-type(3) .footer-link svg { width: 19px; height: 19px; }
+.footer-bottom { margin-top: 36px !important; }
+
+@media (max-width:900px) {
+  footer {
+    grid-template-columns: 1fr 1fr !important;
+    column-gap: 48px !important;
+  }
+  .footer-brand { grid-column: 1/-1; justify-content: center; }
+  .footer-contact,
+  footer > div:nth-of-type(3) { justify-self: stretch; width: 100%; }
+}
+
+@media (max-width:560px) {
+  .maps-button { width: 52px !important; min-height: 52px !important; }
+  .maps-button svg { width: 19px; height: 19px; }
+  footer { grid-template-columns: 1fr !important; gap: 30px !important; }
+  .footer-brand { justify-content: flex-start; }
+  .footer-contact,
+  footer > div:nth-of-type(3) { justify-self: stretch; width: 100%; }
+  .contact-meta span { white-space: normal; }
+}
