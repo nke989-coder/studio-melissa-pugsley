@@ -5,6 +5,7 @@
 
   const images = Array.from({ length: 16 }, (_, index) => `./gallery/${index + 1}.jpeg`);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const gallerySpeedPxPerSecond = 18;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -98,7 +99,7 @@
     lastFrame=now;
     const paused=dragging||hovering||focusPaused||reducedMotion||document.hidden;
     if(!paused&&loopWidth){
-      galleryX-=loopWidth/78000*delta;
+      galleryX-=gallerySpeedPxPerSecond*(delta/1000);
       normalizeGalleryX();
       track.style.transform=`translate3d(${galleryX}px,0,0)`;
     }
@@ -165,7 +166,7 @@
   const closeButton=lightbox.querySelector('.gallery-lightbox-close');
   const prevButton=lightbox.querySelector('.gallery-lightbox-prev');
   const nextButton=lightbox.querySelector('.gallery-lightbox-next');
-  let currentIndex=0,returnFocus=null,touchStartX=0,animating=false,renderToken=0;
+  let currentIndex=0,returnFocus=null,touchStartX=0,animating=false,renderToken=0,openedWithKeyboard=false;
 
   const imageCache=new Map();
   const ensureImage=index=>{
@@ -220,7 +221,7 @@
 
   const openLightbox=async(index,trigger)=>{
     if(animating)return;
-    animating=true;currentIndex=index;returnFocus=trigger;
+    animating=true;currentIndex=index;returnFocus=trigger;openedWithKeyboard=trigger.matches(':focus-visible');
     lightbox.classList.add('is-open');document.body.classList.add('gallery-open');shell.classList.remove('is-ready','is-floating');
     const start=trigger.querySelector('img')?.getBoundingClientRect()||trigger.getBoundingClientRect();
     const loaded=await render(false);
@@ -236,9 +237,28 @@
   };
 
   const closeLightbox=()=>{
-    if(animating||!lightbox.classList.contains('is-open'))return;animating=true;shell.classList.remove('is-floating');
+    if(animating||!lightbox.classList.contains('is-open'))return;
+    animating=true;
+    shell.classList.remove('is-floating');
+    focusPaused=false;
+    hovering=false;
+    lastFrame=performance.now();
     const start=targetRect();const targetImg=returnFocus?.querySelector('img');const end=targetImg?.getBoundingClientRect()||returnFocus?.getBoundingClientRect();
-    const finish=()=>{renderToken+=1;lightbox.classList.remove('is-open');document.body.classList.remove('gallery-open');shell.classList.remove('is-ready');lightboxImage.classList.remove('is-loading');animating=false;if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true})};
+    const finish=()=>{
+      renderToken+=1;
+      lightbox.classList.remove('is-open');
+      document.body.classList.remove('gallery-open');
+      shell.classList.remove('is-ready');
+      lightboxImage.classList.remove('is-loading');
+      animating=false;
+      focusPaused=false;
+      hovering=false;
+      lastFrame=performance.now();
+      if(returnFocus?.isConnected){
+        if(openedWithKeyboard)returnFocus.focus({preventScroll:true});
+        else returnFocus.blur();
+      }
+    };
     if(reducedMotion||!end?.width){finish();return;}
     const ghost=makeGhost(start,images[currentIndex]);shell.classList.remove('is-ready');
     requestAnimationFrame(()=>Object.assign(ghost.style,{left:`${end.left}px`,top:`${end.top}px`,width:`${end.width}px`,height:`${end.height}px`,borderRadius:'3px',transform:'rotate(-.2deg)'}));
