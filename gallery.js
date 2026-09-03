@@ -9,17 +9,13 @@
   const style = document.createElement('style');
   style.textContent = `
     .results-gallery{position:relative;overflow:hidden;margin:-54px 0 72px;padding:18px 0 10px}
-    .results-gallery-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 clamp(24px,4vw,64px) 18px;color:#cbbdb5;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
-    .results-gallery-head span:last-child{opacity:.62}
     .results-gallery-viewport{width:100%;overflow:hidden;cursor:grab}
     .results-gallery-track{display:flex;width:max-content;will-change:transform;animation:results-gallery-loop 78s linear infinite}
     .results-gallery:hover .results-gallery-track,.results-gallery:focus-within .results-gallery-track{animation-play-state:paused}
     .results-gallery-group{display:flex;gap:14px;padding-right:14px;flex:0 0 auto}
     .result-card{width:clamp(220px,19vw,315px);aspect-ratio:4/5;padding:0;border:0;background:#302724;position:relative;overflow:hidden;cursor:zoom-in;flex:0 0 auto}
     .result-card img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;filter:saturate(.9) contrast(1.02);transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .3s ease}
-    .result-card:after{content:'AMPLIAR';position:absolute;left:12px;bottom:12px;padding:7px 9px;background:rgba(40,32,29,.82);color:#fff;font:500 8px/1 var(--sans);letter-spacing:.14em;opacity:0;transform:translateY(4px);transition:opacity .25s ease,transform .25s ease}
     .result-card:hover img,.result-card:focus-visible img{transform:scale(1.035);filter:saturate(1) contrast(1.03)}
-    .result-card:hover:after,.result-card:focus-visible:after{opacity:1;transform:none}
     @keyframes results-gallery-loop{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 
     .gallery-lightbox{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:rgba(24,18,16,.28);backdrop-filter:blur(0);opacity:0;visibility:hidden;transition:opacity .32s ease,visibility .32s ease,background .42s ease,backdrop-filter .42s ease}
@@ -36,11 +32,10 @@
     .gallery-lightbox-close{position:absolute;top:18px;right:18px;width:46px;height:46px;border-radius:50%;font:300 25px/1 var(--sans);z-index:3}
     .gallery-lightbox-nav{position:absolute;top:50%;width:48px;height:56px;transform:translateY(-50%);border-radius:99px;font:300 27px/1 var(--serif);z-index:3}
     .gallery-lightbox-prev{left:14px}.gallery-lightbox-next{right:14px}
-    .gallery-lightbox-counter{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.72);font-size:9px;letter-spacing:.16em;text-transform:uppercase}
     body.gallery-open{overflow:hidden}
 
     @media(max-width:900px){.results-gallery{margin-top:-28px;margin-bottom:52px}.result-card{width:clamp(210px,34vw,290px)}.gallery-lightbox-stage{padding:64px 58px 56px}.gallery-lightbox-shell{max-width:calc(100vw - 116px);max-height:calc(100dvh - 120px)}.gallery-lightbox-image{max-width:calc(100vw - 136px);max-height:calc(100dvh - 146px)}}
-    @media(max-width:560px){.results-gallery{margin:-22px 0 42px;padding-top:8px}.results-gallery-head{padding:0 20px 14px;font-size:8px}.results-gallery-head span:last-child{display:none}.results-gallery-group{gap:10px;padding-right:10px}.result-card{width:72vw;max-width:290px}.result-card:after{opacity:1;transform:none}.gallery-lightbox-stage{padding:58px 10px 48px}.gallery-lightbox-shell{padding:7px;border-radius:22px;max-width:calc(100vw - 20px);max-height:calc(100dvh - 106px)}.gallery-lightbox-image{max-width:calc(100vw - 34px);max-height:calc(100dvh - 122px);border-radius:15px}.gallery-lightbox-close{top:10px;right:10px;width:42px;height:42px}.gallery-lightbox-nav{width:40px;height:50px;background:rgba(40,32,29,.43)}.gallery-lightbox-prev{left:5px}.gallery-lightbox-next{right:5px}.gallery-lightbox-counter{bottom:11px}}
+    @media(max-width:560px){.results-gallery{margin:-22px 0 42px;padding-top:8px}.results-gallery-group{gap:10px;padding-right:10px}.result-card{width:72vw;max-width:290px}.gallery-lightbox-stage{padding:58px 10px 48px}.gallery-lightbox-shell{padding:7px;border-radius:22px;max-width:calc(100vw - 20px);max-height:calc(100dvh - 106px)}.gallery-lightbox-image{max-width:calc(100vw - 34px);max-height:calc(100dvh - 122px);border-radius:15px}.gallery-lightbox-close{top:10px;right:10px;width:42px;height:42px}.gallery-lightbox-nav{width:40px;height:50px;background:rgba(40,32,29,.43)}.gallery-lightbox-prev{left:5px}.gallery-lightbox-next{right:5px}}
     @media(prefers-reduced-motion:reduce){.results-gallery-viewport{overflow-x:auto;scrollbar-width:none}.results-gallery-track{animation:none!important}.results-gallery-group[aria-hidden='true']{display:none}.gallery-lightbox-shell.is-floating{animation:none}.gallery-ghost{transition:none}}
   `;
   document.head.appendChild(style);
@@ -48,7 +43,7 @@
   const gallery=document.createElement('section');
   gallery.className='results-gallery';
   gallery.setAttribute('aria-label','Galeria de resultados de cabelos');
-  gallery.innerHTML=`<div class="results-gallery-head"><span>Resultados reais · cabelos</span><span>Toque ou clique para ampliar</span></div><div class="results-gallery-viewport"><div class="results-gallery-track"></div></div>`;
+  gallery.innerHTML=`<div class="results-gallery-viewport"><div class="results-gallery-track"></div></div>`;
   intro.insertAdjacentElement('afterend',gallery);
   const track=gallery.querySelector('.results-gallery-track');
 
@@ -59,9 +54,9 @@
     images.forEach((src,index)=>{
       const button=document.createElement('button');
       button.type='button';button.className='result-card';button.dataset.galleryIndex=String(index);
-      button.setAttribute('aria-label',`Ampliar resultado ${index+1} de ${images.length}`);
+      button.setAttribute('aria-label','Ampliar foto do resultado');
       if(duplicate)button.tabIndex=-1;
-      const img=document.createElement('img');img.src=src;img.alt=duplicate?'':`Resultado de cabelo ${index+1}`;img.loading='lazy';img.decoding='async';
+      const img=document.createElement('img');img.src=src;img.alt=duplicate?'':'Resultado de cabelo';img.loading='lazy';img.decoding='async';
       button.appendChild(img);group.appendChild(button);
     });
     return group;
@@ -70,12 +65,11 @@
 
   const lightbox=document.createElement('div');
   lightbox.className='gallery-lightbox';lightbox.setAttribute('role','dialog');lightbox.setAttribute('aria-modal','true');lightbox.setAttribute('aria-label','Resultado ampliado');
-  lightbox.innerHTML=`<div class="gallery-lightbox-stage"><button class="gallery-lightbox-close" type="button" aria-label="Fechar galeria">×</button><button class="gallery-lightbox-nav gallery-lightbox-prev" type="button" aria-label="Foto anterior">‹</button><div class="gallery-lightbox-shell"><img class="gallery-lightbox-image" alt="" /></div><button class="gallery-lightbox-nav gallery-lightbox-next" type="button" aria-label="Próxima foto">›</button><div class="gallery-lightbox-counter" aria-live="polite"></div></div>`;
+  lightbox.innerHTML=`<div class="gallery-lightbox-stage"><button class="gallery-lightbox-close" type="button" aria-label="Fechar galeria">×</button><button class="gallery-lightbox-nav gallery-lightbox-prev" type="button" aria-label="Foto anterior">‹</button><div class="gallery-lightbox-shell"><img class="gallery-lightbox-image" alt="Resultado de cabelo" /></div><button class="gallery-lightbox-nav gallery-lightbox-next" type="button" aria-label="Próxima foto">›</button></div>`;
   document.body.appendChild(lightbox);
 
   const shell=lightbox.querySelector('.gallery-lightbox-shell');
   const lightboxImage=lightbox.querySelector('.gallery-lightbox-image');
-  const counter=lightbox.querySelector('.gallery-lightbox-counter');
   const closeButton=lightbox.querySelector('.gallery-lightbox-close');
   const prevButton=lightbox.querySelector('.gallery-lightbox-prev');
   const nextButton=lightbox.querySelector('.gallery-lightbox-next');
@@ -86,8 +80,7 @@
   };
   const render=(animate=false)=>{
     lightboxImage.src=images[currentIndex];
-    lightboxImage.alt=`Resultado de cabelo ${currentIndex+1} de ${images.length}`;
-    counter.textContent=`${String(currentIndex+1).padStart(2,'0')} / ${String(images.length).padStart(2,'0')}`;
+    lightboxImage.alt='Resultado de cabelo';
     if(animate&&!reducedMotion)lightboxImage.animate([{opacity:.15,transform:'scale(.975)'},{opacity:1,transform:'scale(1)'}],{duration:260,easing:'ease-out'});
     preloadNeighbors();
   };
