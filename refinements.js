@@ -28,7 +28,6 @@
     });
   }
 
-  // SEO local e social — complementa os metadados estáticos do HTML.
   const siteUrl = 'https://nke989-coder.github.io/studio-melissa-pugsley/';
   const title = 'Cabelos e Micropigmentação em Curitiba e Florianópolis | Melissa Pugsley';
   const description = 'Studio Melissa Pugsley: cabelos, mechas, coloração, micropigmentação e sobrancelhas com atendimento em Curitiba e Florianópolis. Agende pelo WhatsApp.';
@@ -81,7 +80,6 @@
         image: imageUrl,
         telephone: '+55 41 99767-8286',
         email: 'mspugsley@gmail.com',
-        priceRange: '$$',
         address: {
           '@type': 'PostalAddress',
           streetAddress: 'Antônio Cândido Cavalim, 562',
@@ -100,7 +98,6 @@
         image: imageUrl,
         telephone: '+55 41 99767-8286',
         email: 'mspugsley@gmail.com',
-        priceRange: '$$',
         address: {
           '@type': 'PostalAddress',
           streetAddress: 'Fermino Hermenegildo dos Santos, 364 — Fundos',
