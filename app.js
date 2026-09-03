@@ -125,17 +125,20 @@ if (reduced || !('IntersectionObserver' in window)) {
   document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 }
 
-// Fully responsive, gapless specialties marquee.
+// Stable specialties marquee: built once, no resize rebuilds on mobile browser UI changes.
 const marqueeTrack = document.querySelector('.marquee-track');
 if (marqueeTrack) {
   const specialties = ['MECHAS', 'COLORAÇÃO', 'MICROPIGMENTAÇÃO', 'SOBRANCELHAS', 'PENTEADOS', 'CASAMENTOS'];
-  let resizeTimer;
+
+  // Rename the live track so older refinement code cannot replace/rebuild it.
+  marqueeTrack.classList.remove('marquee-track');
+  marqueeTrack.classList.add('marquee-engine-track');
+  marqueeTrack.replaceChildren();
 
   const createItem = (label) => {
     const item = document.createElement('span');
-    item.className = 'marquee-item';
+    item.className = 'marquee-engine-item';
     item.append(document.createTextNode(label));
-
     const separator = document.createElement('i');
     separator.setAttribute('aria-hidden', 'true');
     separator.textContent = '✦';
@@ -143,85 +146,74 @@ if (marqueeTrack) {
     return item;
   };
 
-  const buildMarquee = () => {
-    marqueeTrack.style.animation = 'none';
-    marqueeTrack.replaceChildren();
-
-    const measure = document.createElement('div');
-    measure.className = 'marquee-group';
-    specialties.forEach((label) => measure.appendChild(createItem(label)));
-    marqueeTrack.appendChild(measure);
-
-    const cycleWidth = measure.getBoundingClientRect().width;
-    const viewportWidth = document.documentElement.clientWidth;
-    const repeats = Math.max(2, Math.ceil((viewportWidth * 1.5) / cycleWidth));
-
-    const groupA = document.createElement('div');
-    groupA.className = 'marquee-group';
-    const groupB = document.createElement('div');
-    groupB.className = 'marquee-group';
-    groupB.setAttribute('aria-hidden', 'true');
-
-    for (let r = 0; r < repeats; r += 1) {
-      specialties.forEach((label) => {
-        groupA.appendChild(createItem(label));
-        groupB.appendChild(createItem(label));
-      });
+  const createGroup = (hidden = false) => {
+    const group = document.createElement('div');
+    group.className = 'marquee-engine-group';
+    if (hidden) group.setAttribute('aria-hidden', 'true');
+    for (let repeat = 0; repeat < 3; repeat += 1) {
+      specialties.forEach((label) => group.appendChild(createItem(label)));
     }
-
-    marqueeTrack.replaceChildren(groupA, groupB);
-
-    requestAnimationFrame(() => {
-      const groupWidth = groupA.getBoundingClientRect().width;
-      marqueeTrack.style.setProperty('--marquee-distance', `${groupWidth}px`);
-      marqueeTrack.style.animation = reduced ? 'none' : 'marquee-seamless 52s linear infinite';
-    });
+    return group;
   };
+
+  const groupA = createGroup(false);
+  const groupB = createGroup(true);
+  marqueeTrack.append(groupA, groupB);
 
   const marqueeStyle = document.createElement('style');
   marqueeStyle.textContent = `
-    .marquee-track {
-      display: flex;
-      width: max-content;
-      will-change: transform;
+    .marquee {
+      width:100%;
+      max-width:100vw;
+      overflow:hidden !important;
     }
-    .marquee-group {
-      flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      width: max-content;
+    .marquee-engine-track {
+      display:flex;
+      width:max-content;
+      transform:translate3d(0,0,0);
+      will-change:transform;
+      backface-visibility:hidden;
     }
-    .marquee-item {
-      min-width: 0 !important;
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      white-space: nowrap;
-      padding-left: clamp(20px, 2.2vw, 36px);
-      gap: clamp(20px, 2.2vw, 36px);
+    .marquee-engine-group {
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      width:max-content;
     }
-    .marquee-item i {
-      margin: 0;
-      color: var(--rose);
-      font-style: normal;
-      flex: 0 0 auto;
+    .marquee-engine-item {
+      min-width:0 !important;
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      white-space:nowrap;
+      padding-left:clamp(20px,2.2vw,36px);
+      gap:clamp(20px,2.2vw,36px);
     }
-    @keyframes marquee-seamless {
-      from { transform: translate3d(0,0,0); }
-      to { transform: translate3d(calc(-1 * var(--marquee-distance)),0,0); }
+    .marquee-engine-item i {
+      margin:0 !important;
+      color:var(--rose);
+      font-style:normal;
+      flex:0 0 auto;
     }
-    @media (max-width:560px) {
-      .marquee-item {
-        padding-left: 16px;
-        gap: 16px;
-      }
+    @media(max-width:560px) {
+      .marquee-engine-item { padding-left:16px; gap:16px; }
     }
   `;
   document.head.appendChild(marqueeStyle);
 
-  buildMarquee();
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(buildMarquee, 120);
-  });
+  if (!reduced) {
+    requestAnimationFrame(() => {
+      const groupWidth = groupA.getBoundingClientRect().width;
+      if (!groupWidth) return;
+      const pixelsPerSecond = 18;
+      const duration = Math.max(90, groupWidth / pixelsPerSecond);
+      marqueeTrack.animate(
+        [
+          { transform: 'translate3d(0,0,0)' },
+          { transform: `translate3d(-${groupWidth}px,0,0)` }
+        ],
+        { duration: duration * 1000, iterations: Infinity, easing: 'linear' }
+      );
+    });
+  }
 }
