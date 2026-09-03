@@ -136,3 +136,27 @@ footer > div:nth-of-type(3) .footer-link svg { width: 19px; height: 19px; }
   .contact-meta span { white-space: normal; }
   .legal-nav { width: 100%; justify-content: flex-start; }
 }
+
+/* Keep the specialties strip isolated from mobile viewport changes and restore
+   the intended calm pace. The stable track contains four full specialty cycles,
+   so 208s preserves the original ~52s pace per cycle instead of running 4× faster. */
+.marquee {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow: hidden !important;
+  overflow: clip !important;
+}
+.marquee-track-stable {
+  animation-duration: 208s !important;
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
+}
+@media (max-width:560px) {
+  .marquee {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  .marquee-track-stable {
+    animation-duration: 208s !important;
+  }
+}
