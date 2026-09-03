@@ -11,15 +11,14 @@
     .results-gallery{position:relative;overflow:hidden;margin:-54px 0 72px;padding:18px 0 10px}
     .results-gallery-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 clamp(24px,4vw,64px) 18px;color:#cbbdb5;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
     .results-gallery-head span:last-child{opacity:.62}
-    .results-gallery-viewport{width:100%;overflow:hidden;cursor:grab}
-    .results-gallery-track{display:flex;width:max-content;will-change:transform;animation:results-gallery-loop 78s linear infinite}
-    .results-gallery:hover .results-gallery-track,.results-gallery:focus-within .results-gallery-track{animation-play-state:paused}
+    .results-gallery-viewport{width:100%;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+    .results-gallery-viewport.is-dragging{cursor:grabbing}
+    .results-gallery-track{display:flex;width:max-content;will-change:transform;transform:translate3d(0,0,0)}
     .results-gallery-group{display:flex;gap:14px;padding-right:14px;flex:0 0 auto}
     .result-card{width:clamp(220px,19vw,315px);aspect-ratio:4/5;padding:0;border:0;background:#302724;position:relative;overflow:hidden;cursor:zoom-in;flex:0 0 auto}
     .result-card::after{content:none!important;display:none!important}
-    .result-card img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;filter:saturate(.9) contrast(1.02);transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .3s ease}
+    .result-card img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;filter:saturate(.9) contrast(1.02);transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .3s ease;-webkit-user-drag:none;user-select:none}
     .result-card:hover img,.result-card:focus-visible img{transform:scale(1.035);filter:saturate(1) contrast(1.03)}
-    @keyframes results-gallery-loop{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 
     .gallery-lightbox{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:rgba(24,18,16,.28);backdrop-filter:blur(0);opacity:0;visibility:hidden;transition:opacity .32s ease,visibility .32s ease,background .42s ease,backdrop-filter .42s ease}
     .gallery-lightbox.is-open{opacity:1;visibility:visible;background:rgba(24,18,16,.76);backdrop-filter:blur(18px) saturate(.8)}
@@ -40,7 +39,7 @@
 
     @media(max-width:900px){.results-gallery{margin-top:-28px;margin-bottom:52px}.result-card{width:clamp(210px,34vw,290px)}.gallery-lightbox-stage{padding:64px 58px 56px}.gallery-lightbox-shell{max-width:calc(100vw - 116px);max-height:calc(100dvh - 120px)}.gallery-lightbox-image{max-width:calc(100vw - 136px);max-height:calc(100dvh - 146px)}}
     @media(max-width:560px){.results-gallery{margin:-22px 0 42px;padding-top:8px}.results-gallery-head{padding:0 20px 14px;font-size:8px}.results-gallery-head span:last-child{display:none}.results-gallery-group{gap:10px;padding-right:10px}.result-card{width:72vw;max-width:290px}.gallery-lightbox-stage{padding:58px 10px 48px}.gallery-lightbox-shell{padding:7px;border-radius:22px;max-width:calc(100vw - 20px);max-height:calc(100dvh - 106px)}.gallery-lightbox-image{max-width:calc(100vw - 34px);max-height:calc(100dvh - 122px);border-radius:15px}.gallery-lightbox-close{top:10px;right:10px;width:42px;height:42px}.gallery-lightbox-nav{width:40px;height:50px;background:rgba(40,32,29,.43)}.gallery-lightbox-prev{left:5px}.gallery-lightbox-next{right:5px}}
-    @media(prefers-reduced-motion:reduce){.results-gallery-viewport{overflow-x:auto;scrollbar-width:none}.results-gallery-track{animation:none!important}.results-gallery-group[aria-hidden='true']{display:none}.gallery-lightbox-shell.is-floating{animation:none}.gallery-ghost{transition:none}}
+    @media(prefers-reduced-motion:reduce){.gallery-lightbox-shell.is-floating{animation:none}.gallery-ghost{transition:none}}
   `;
   document.head.appendChild(style);
 
@@ -49,6 +48,7 @@
   gallery.setAttribute('aria-label','Galeria de resultados de cabelos');
   gallery.innerHTML=`<div class="results-gallery-head"><span>Resultados reais · cabelos</span><span>Toque ou clique para ampliar</span></div><div class="results-gallery-viewport"><div class="results-gallery-track"></div></div>`;
   intro.insertAdjacentElement('afterend',gallery);
+  const viewport=gallery.querySelector('.results-gallery-viewport');
   const track=gallery.querySelector('.results-gallery-track');
 
   const buildGroup=(duplicate=false)=>{
@@ -66,6 +66,99 @@
     return group;
   };
   track.append(buildGroup(false),buildGroup(true));
+
+  // Continuous loop with real drag/swipe navigation.
+  let galleryX=0;
+  let loopWidth=0;
+  let lastFrame=performance.now();
+  let hovering=false;
+  let focusPaused=false;
+  let dragging=false;
+  let pointerId=null;
+  let dragStartX=0;
+  let dragStartGalleryX=0;
+  let dragDistance=0;
+  let suppressClick=false;
+
+  const measureLoop=()=>{
+    loopWidth=track.querySelector('.results-gallery-group')?.getBoundingClientRect().width||0;
+    if(loopWidth){
+      while(galleryX<=-loopWidth)galleryX+=loopWidth;
+      while(galleryX>0)galleryX-=loopWidth;
+      track.style.transform=`translate3d(${galleryX}px,0,0)`;
+    }
+  };
+
+  const normalizeGalleryX=()=>{
+    if(!loopWidth)return;
+    while(galleryX<=-loopWidth)galleryX+=loopWidth;
+    while(galleryX>0)galleryX-=loopWidth;
+  };
+
+  const galleryFrame=now=>{
+    const delta=Math.min(40,now-lastFrame);
+    lastFrame=now;
+    const paused=dragging||hovering||focusPaused||reducedMotion||document.hidden;
+    if(!paused&&loopWidth){
+      galleryX-=loopWidth/78000*delta;
+      normalizeGalleryX();
+      track.style.transform=`translate3d(${galleryX}px,0,0)`;
+    }
+    requestAnimationFrame(galleryFrame);
+  };
+
+  requestAnimationFrame(()=>{measureLoop();requestAnimationFrame(galleryFrame)});
+  window.addEventListener('resize',()=>requestAnimationFrame(measureLoop));
+  gallery.querySelectorAll('img').forEach(img=>img.addEventListener('load',measureLoop,{once:true}));
+
+  viewport.addEventListener('pointerenter',()=>{hovering=true});
+  viewport.addEventListener('pointerleave',()=>{if(!dragging)hovering=false});
+  viewport.addEventListener('focusin',()=>{focusPaused=true});
+  viewport.addEventListener('focusout',event=>{if(!viewport.contains(event.relatedTarget))focusPaused=false});
+
+  viewport.addEventListener('pointerdown',event=>{
+    if(event.pointerType==='mouse'&&event.button!==0)return;
+    dragging=true;
+    pointerId=event.pointerId;
+    dragStartX=event.clientX;
+    dragStartGalleryX=galleryX;
+    dragDistance=0;
+    suppressClick=false;
+    viewport.classList.add('is-dragging');
+    viewport.setPointerCapture?.(event.pointerId);
+  });
+
+  viewport.addEventListener('pointermove',event=>{
+    if(!dragging||event.pointerId!==pointerId)return;
+    const dx=event.clientX-dragStartX;
+    dragDistance=Math.max(dragDistance,Math.abs(dx));
+    galleryX=dragStartGalleryX+dx;
+    normalizeGalleryX();
+    track.style.transform=`translate3d(${galleryX}px,0,0)`;
+    if(dragDistance>6)suppressClick=true;
+  });
+
+  const endDrag=event=>{
+    if(!dragging||event.pointerId!==pointerId)return;
+    dragging=false;
+    viewport.classList.remove('is-dragging');
+    try{viewport.releasePointerCapture?.(event.pointerId)}catch(_){ }
+    pointerId=null;
+    if(event.pointerType!=='mouse')hovering=false;
+    if(suppressClick)setTimeout(()=>{suppressClick=false},80);
+  };
+  viewport.addEventListener('pointerup',endDrag);
+  viewport.addEventListener('pointercancel',endDrag);
+
+  viewport.addEventListener('wheel',event=>{
+    if(Math.abs(event.deltaX)>Math.abs(event.deltaY)||event.shiftKey){
+      event.preventDefault();
+      const delta=event.shiftKey&&Math.abs(event.deltaX)<1?event.deltaY:event.deltaX;
+      galleryX-=delta;
+      normalizeGalleryX();
+      track.style.transform=`translate3d(${galleryX}px,0,0)`;
+    }
+  },{passive:false});
 
   const lightbox=document.createElement('div');
   lightbox.className='gallery-lightbox';lightbox.setAttribute('role','dialog');lightbox.setAttribute('aria-modal','true');lightbox.setAttribute('aria-label','Resultado ampliado');
@@ -120,7 +213,10 @@
   };
 
   const move=direction=>{if(animating)return;currentIndex=(currentIndex+direction+images.length)%images.length;render(true)};
-  track.addEventListener('click',event=>{const button=event.target.closest('.result-card');if(button)openLightbox(Number(button.dataset.galleryIndex),button)});
+  track.addEventListener('click',event=>{
+    if(suppressClick){event.preventDefault();event.stopPropagation();return;}
+    const button=event.target.closest('.result-card');if(button)openLightbox(Number(button.dataset.galleryIndex),button)
+  });
   closeButton.addEventListener('click',closeLightbox);prevButton.addEventListener('click',()=>move(-1));nextButton.addEventListener('click',()=>move(1));
   lightbox.addEventListener('click',event=>{if(event.target===lightbox||event.target.classList.contains('gallery-lightbox-stage'))closeLightbox()});
   lightbox.addEventListener('touchstart',event=>{touchStartX=event.changedTouches[0]?.clientX||0},{passive:true});
