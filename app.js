@@ -128,7 +128,7 @@ if (reduced || !('IntersectionObserver' in window)) {
 // Fully responsive, gapless specialties marquee.
 const marqueeTrack = document.querySelector('.marquee-track');
 if (marqueeTrack) {
-  const specialties = ['MECHAS', 'COLORAÇÃO', 'MICROPIGMENTAÇÃO', 'SOBRANCELHAS'];
+  const specialties = ['MECHAS', 'COLORAÇÃO', 'MICROPIGMENTAÇÃO', 'SOBRANCELHAS', 'PENTEADOS', 'CASAMENTOS'];
   let resizeTimer;
 
   const createItem = (label) => {
