@@ -28,6 +28,27 @@
     });
   }
 
+  // The gallery pauses while it is being touched/dragged or while one of its
+  // cards owns keyboard focus. Release that pointer-generated focus as soon as
+  // the visitor leaves/releases the gallery so the automatic loop resumes
+  // immediately without requiring an extra click elsewhere.
+  const galleryViewport = document.querySelector('.results-gallery-viewport');
+  if (galleryViewport) {
+    const releasePointerFocus = () => {
+      const active = document.activeElement;
+      if (active && galleryViewport.contains(active) && active.matches('.result-card')) {
+        active.blur();
+      }
+    };
+
+    galleryViewport.addEventListener('pointerleave', releasePointerFocus);
+    galleryViewport.addEventListener('pointerup', (event) => {
+      if (event.pointerType !== 'mouse') releasePointerFocus();
+    });
+    galleryViewport.addEventListener('pointercancel', releasePointerFocus);
+    galleryViewport.addEventListener('touchend', releasePointerFocus, { passive: true });
+  }
+
   const siteUrl = 'https://nke989-coder.github.io/studio-melissa-pugsley/';
   const title = 'Cabelos e Micropigmentação em Curitiba e Florianópolis | Melissa Pugsley';
   const description = 'Studio Melissa Pugsley: cabelos, mechas, coloração, micropigmentação e sobrancelhas com atendimento em Curitiba e Florianópolis. Agende pelo WhatsApp.';
