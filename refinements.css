@@ -97,6 +97,23 @@ footer > div:nth-of-type(3) .footer-link span {
 }
 footer > div:nth-of-type(3) .footer-link svg { width: 19px; height: 19px; }
 .footer-bottom { margin-top: 36px !important; }
+.legal-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: rgba(238,228,221,.56);
+  font-size: 10px;
+  letter-spacing: .05em;
+  white-space: nowrap;
+}
+.legal-nav a {
+  color: rgba(238,228,221,.7);
+  text-decoration: none;
+  transition: color .2s ease;
+}
+.legal-nav a:hover,
+.legal-nav a:focus-visible { color: #f0c9ba; }
 
 @media (max-width:900px) {
   footer {
@@ -106,6 +123,7 @@ footer > div:nth-of-type(3) .footer-link svg { width: 19px; height: 19px; }
   .footer-brand { grid-column: 1/-1; justify-content: center; }
   .footer-contact,
   footer > div:nth-of-type(3) { justify-self: stretch; width: 100%; }
+  .footer-bottom { row-gap: 12px; }
 }
 
 @media (max-width:560px) {
@@ -116,4 +134,5 @@ footer > div:nth-of-type(3) .footer-link svg { width: 19px; height: 19px; }
   .footer-contact,
   footer > div:nth-of-type(3) { justify-self: stretch; width: 100%; }
   .contact-meta span { white-space: normal; }
+  .legal-nav { width: 100%; justify-content: flex-start; }
 }
