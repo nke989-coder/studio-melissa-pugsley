@@ -71,6 +71,43 @@
     }, true);
 
     galleryViewport.addEventListener('pointercancel', () => { desktopPress = null; }, true);
+
+    const gallerySection = galleryViewport.closest('.results-gallery');
+    if (gallerySection && !gallerySection.querySelector('.gallery-drag-hint')) {
+      const hint = document.createElement('div');
+      hint.className = 'gallery-drag-hint';
+      hint.setAttribute('aria-hidden', 'true');
+      hint.innerHTML = `
+        <svg viewBox="0 0 48 20" focusable="false">
+          <path d="M18 10H4m0 0 5-5M4 10l5 5"></path>
+          <path d="M30 10h14m0 0-5-5m5 5-5 5"></path>
+        </svg>
+        <span>Arraste para os lados</span>`;
+      gallerySection.appendChild(hint);
+
+      let hintShown = false;
+      const showHint = () => {
+        if (hintShown) return;
+        hintShown = true;
+        hint.classList.add('is-visible');
+        window.setTimeout(() => hint.classList.remove('is-visible'), 3200);
+      };
+
+      if ('IntersectionObserver' in window) {
+        const hintObserver = new IntersectionObserver((entries, observer) => {
+          if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.32)) {
+            showHint();
+            observer.disconnect();
+          }
+        }, { threshold: [0.32, 0.5] });
+        hintObserver.observe(gallerySection);
+      } else {
+        showHint();
+      }
+
+      galleryViewport.addEventListener('pointerdown', () => hint.classList.remove('is-visible'), { passive: true });
+      galleryViewport.addEventListener('touchstart', () => hint.classList.remove('is-visible'), { passive: true });
+    }
   }
 
   // Stable specialties loop. app.js rebuilds the marquee on every resize; on
