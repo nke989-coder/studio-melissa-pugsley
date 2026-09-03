@@ -73,6 +73,92 @@
     galleryViewport.addEventListener('pointercancel', () => { desktopPress = null; }, true);
   }
 
+  // Stable specialties loop. app.js rebuilds the marquee on every resize; on
+  // mobile browsers the address bar can trigger resize events while scrolling,
+  // making the strip restart/jump. Replacing the live track disconnects that
+  // old resize handler and keeps one continuous, gapless animation.
+  const currentMarqueeTrack = document.querySelector('.marquee-track');
+  if (currentMarqueeTrack) {
+    const specialties = ['MECHAS', 'COLORAÇÃO', 'MICROPIGMENTAÇÃO', 'SOBRANCELHAS', 'PENTEADOS', 'CASAMENTOS'];
+    const stableTrack = currentMarqueeTrack.cloneNode(false);
+    stableTrack.classList.add('marquee-track-stable');
+
+    const createGroup = (hidden = false) => {
+      const group = document.createElement('div');
+      group.className = 'marquee-stable-group';
+      if (hidden) group.setAttribute('aria-hidden', 'true');
+
+      for (let repeat = 0; repeat < 4; repeat += 1) {
+        specialties.forEach((label) => {
+          const item = document.createElement('span');
+          item.className = 'marquee-stable-item';
+          item.append(document.createTextNode(label));
+
+          const separator = document.createElement('i');
+          separator.setAttribute('aria-hidden', 'true');
+          separator.textContent = '✦';
+          item.appendChild(separator);
+          group.appendChild(item);
+        });
+      }
+      return group;
+    };
+
+    stableTrack.append(createGroup(false), createGroup(true));
+    currentMarqueeTrack.replaceWith(stableTrack);
+
+    const stableMarqueeStyle = document.createElement('style');
+    stableMarqueeStyle.textContent = `
+      .marquee {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+        contain: paint;
+      }
+      .marquee-track-stable {
+        display: flex !important;
+        width: max-content !important;
+        animation: marquee-mobile-stable 52s linear infinite !important;
+        will-change: transform;
+      }
+      .marquee-stable-group {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        width: max-content;
+      }
+      .marquee-stable-item {
+        display: inline-flex !important;
+        flex: 0 0 auto !important;
+        min-width: 0 !important;
+        align-items: center;
+        white-space: nowrap;
+        padding-left: clamp(20px, 2.2vw, 36px);
+        gap: clamp(20px, 2.2vw, 36px);
+      }
+      .marquee-stable-item i {
+        margin: 0 !important;
+        color: var(--rose);
+        font-style: normal;
+        flex: 0 0 auto;
+      }
+      @keyframes marquee-mobile-stable {
+        from { transform: translate3d(0, 0, 0); }
+        to { transform: translate3d(-50%, 0, 0); }
+      }
+      @media (max-width: 560px) {
+        .marquee-stable-item {
+          padding-left: 16px;
+          gap: 16px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .marquee-track-stable { animation: none !important; }
+      }
+    `;
+    document.head.appendChild(stableMarqueeStyle);
+  }
+
   const siteUrl = 'https://nke989-coder.github.io/studio-melissa-pugsley/';
   const title = 'Cabelos e Micropigmentação em Curitiba e Florianópolis | Melissa Pugsley';
   const description = 'Studio Melissa Pugsley: cabelos, mechas, coloração, micropigmentação e sobrancelhas com atendimento em Curitiba e Florianópolis. Agende pelo WhatsApp.';
