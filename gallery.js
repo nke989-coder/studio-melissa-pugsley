@@ -9,11 +9,14 @@
   const style = document.createElement('style');
   style.textContent = `
     .results-gallery{position:relative;overflow:hidden;margin:-54px 0 72px;padding:18px 0 10px}
+    .results-gallery-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 clamp(24px,4vw,64px) 18px;color:#cbbdb5;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+    .results-gallery-head span:last-child{opacity:.62}
     .results-gallery-viewport{width:100%;overflow:hidden;cursor:grab}
     .results-gallery-track{display:flex;width:max-content;will-change:transform;animation:results-gallery-loop 78s linear infinite}
     .results-gallery:hover .results-gallery-track,.results-gallery:focus-within .results-gallery-track{animation-play-state:paused}
     .results-gallery-group{display:flex;gap:14px;padding-right:14px;flex:0 0 auto}
     .result-card{width:clamp(220px,19vw,315px);aspect-ratio:4/5;padding:0;border:0;background:#302724;position:relative;overflow:hidden;cursor:zoom-in;flex:0 0 auto}
+    .result-card::after{content:none!important;display:none!important}
     .result-card img{width:100%;height:100%;display:block;object-fit:cover;object-position:center;filter:saturate(.9) contrast(1.02);transition:transform .55s cubic-bezier(.2,.7,.2,1),filter .3s ease}
     .result-card:hover img,.result-card:focus-visible img{transform:scale(1.035);filter:saturate(1) contrast(1.03)}
     @keyframes results-gallery-loop{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
@@ -26,6 +29,7 @@
     .gallery-lightbox-shell.is-floating{animation:gallery-float 5.4s ease-in-out infinite}
     @keyframes gallery-float{0%,100%{transform:translate3d(0,0,0) rotate(0)}50%{transform:translate3d(0,-8px,0) rotate(.22deg)}}
     .gallery-lightbox-image{display:block;width:auto;height:auto;max-width:min(86vw,1180px);max-height:calc(100dvh - 150px);object-fit:contain;border-radius:18px;box-shadow:0 18px 52px rgba(0,0,0,.28);user-select:none;-webkit-user-drag:none}
+    .gallery-lightbox-counter{display:none!important}
     .gallery-ghost{position:fixed;z-index:1002;object-fit:cover;margin:0;pointer-events:none;border-radius:3px;box-shadow:0 22px 75px rgba(0,0,0,.38);will-change:left,top,width,height,border-radius,transform,opacity;transition:left .52s cubic-bezier(.16,.84,.25,1),top .52s cubic-bezier(.16,.84,.25,1),width .52s cubic-bezier(.16,.84,.25,1),height .52s cubic-bezier(.16,.84,.25,1),border-radius .52s ease,transform .52s cubic-bezier(.16,.84,.25,1),opacity .2s ease}
     .gallery-lightbox-close,.gallery-lightbox-nav{border:1px solid rgba(255,255,255,.28);background:rgba(40,32,29,.5);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(10px);transition:background .2s ease,border-color .2s ease,transform .2s ease}
     .gallery-lightbox-close:hover,.gallery-lightbox-nav:hover{background:var(--clay);border-color:var(--clay)}
@@ -35,7 +39,7 @@
     body.gallery-open{overflow:hidden}
 
     @media(max-width:900px){.results-gallery{margin-top:-28px;margin-bottom:52px}.result-card{width:clamp(210px,34vw,290px)}.gallery-lightbox-stage{padding:64px 58px 56px}.gallery-lightbox-shell{max-width:calc(100vw - 116px);max-height:calc(100dvh - 120px)}.gallery-lightbox-image{max-width:calc(100vw - 136px);max-height:calc(100dvh - 146px)}}
-    @media(max-width:560px){.results-gallery{margin:-22px 0 42px;padding-top:8px}.results-gallery-group{gap:10px;padding-right:10px}.result-card{width:72vw;max-width:290px}.gallery-lightbox-stage{padding:58px 10px 48px}.gallery-lightbox-shell{padding:7px;border-radius:22px;max-width:calc(100vw - 20px);max-height:calc(100dvh - 106px)}.gallery-lightbox-image{max-width:calc(100vw - 34px);max-height:calc(100dvh - 122px);border-radius:15px}.gallery-lightbox-close{top:10px;right:10px;width:42px;height:42px}.gallery-lightbox-nav{width:40px;height:50px;background:rgba(40,32,29,.43)}.gallery-lightbox-prev{left:5px}.gallery-lightbox-next{right:5px}}
+    @media(max-width:560px){.results-gallery{margin:-22px 0 42px;padding-top:8px}.results-gallery-head{padding:0 20px 14px;font-size:8px}.results-gallery-head span:last-child{display:none}.results-gallery-group{gap:10px;padding-right:10px}.result-card{width:72vw;max-width:290px}.gallery-lightbox-stage{padding:58px 10px 48px}.gallery-lightbox-shell{padding:7px;border-radius:22px;max-width:calc(100vw - 20px);max-height:calc(100dvh - 106px)}.gallery-lightbox-image{max-width:calc(100vw - 34px);max-height:calc(100dvh - 122px);border-radius:15px}.gallery-lightbox-close{top:10px;right:10px;width:42px;height:42px}.gallery-lightbox-nav{width:40px;height:50px;background:rgba(40,32,29,.43)}.gallery-lightbox-prev{left:5px}.gallery-lightbox-next{right:5px}}
     @media(prefers-reduced-motion:reduce){.results-gallery-viewport{overflow-x:auto;scrollbar-width:none}.results-gallery-track{animation:none!important}.results-gallery-group[aria-hidden='true']{display:none}.gallery-lightbox-shell.is-floating{animation:none}.gallery-ghost{transition:none}}
   `;
   document.head.appendChild(style);
@@ -43,7 +47,7 @@
   const gallery=document.createElement('section');
   gallery.className='results-gallery';
   gallery.setAttribute('aria-label','Galeria de resultados de cabelos');
-  gallery.innerHTML=`<div class="results-gallery-viewport"><div class="results-gallery-track"></div></div>`;
+  gallery.innerHTML=`<div class="results-gallery-head"><span>Resultados reais · cabelos</span><span>Toque ou clique para ampliar</span></div><div class="results-gallery-viewport"><div class="results-gallery-track"></div></div>`;
   intro.insertAdjacentElement('afterend',gallery);
   const track=gallery.querySelector('.results-gallery-track');
 
