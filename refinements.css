@@ -201,7 +201,34 @@ footer > div:nth-of-type(3) .footer-link svg { width: 19px; height: 19px; }
   .footer-contact,
   footer > div:nth-of-type(3) { justify-self: stretch; width: 100%; }
   .contact-meta span { white-space: normal; }
-  .legal-nav { width: 100%; justify-content: flex-start; }
+
+  /* Mobile footer: legal links and copyright centered; Atlas remains the final signature. */
+  .footer-bottom {
+    justify-items: center !important;
+    row-gap: 12px !important;
+    padding-top: 20px !important;
+    margin-top: 22px !important;
+  }
+  .legal-nav {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center;
+    order: 1;
+    font-size: 10px;
+  }
+  .footer-bottom > small {
+    order: 2;
+    width: 100%;
+    text-align: center;
+    justify-self: center !important;
+  }
+  .footer-bottom .atlas-credit {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+    text-align: center;
+  }
 
   /* Mobile: 01/02 on the first row and 03/04 on the second. */
   .process.section-pad {
