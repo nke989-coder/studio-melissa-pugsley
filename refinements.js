@@ -27,4 +27,99 @@
       value.replaceWith(meta);
     });
   }
+
+  // SEO local e social — complementa os metadados estáticos do HTML.
+  const siteUrl = 'https://nke989-coder.github.io/studio-melissa-pugsley/';
+  const title = 'Cabelos e Micropigmentação em Curitiba e Florianópolis | Melissa Pugsley';
+  const description = 'Studio Melissa Pugsley: cabelos, mechas, coloração, micropigmentação e sobrancelhas com atendimento em Curitiba e Florianópolis. Agende pelo WhatsApp.';
+  const imageUrl = `${siteUrl}hero-cabelos.png`;
+
+  document.title = title;
+
+  const setMeta = (key, content, property = false) => {
+    const attr = property ? 'property' : 'name';
+    let meta = document.head.querySelector(`meta[${attr}="${key}"]`);
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute(attr, key);
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', content);
+  };
+
+  setMeta('description', description);
+  setMeta('robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  setMeta('googlebot', 'index, follow, max-image-preview:large');
+  setMeta('og:title', title, true);
+  setMeta('og:description', description, true);
+  setMeta('og:type', 'website', true);
+  setMeta('og:url', siteUrl, true);
+  setMeta('og:image', imageUrl, true);
+  setMeta('og:locale', 'pt_BR', true);
+  setMeta('og:site_name', 'Studio Melissa Pugsley', true);
+  setMeta('twitter:card', 'summary_large_image');
+  setMeta('twitter:title', title);
+  setMeta('twitter:description', description);
+  setMeta('twitter:image', imageUrl);
+
+  let canonical = document.head.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.appendChild(canonical);
+  }
+  canonical.href = siteUrl;
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BeautySalon',
+        '@id': `${siteUrl}#curitiba`,
+        name: 'Studio Melissa Pugsley — Curitiba',
+        url: siteUrl,
+        image: imageUrl,
+        telephone: '+55 41 99767-8286',
+        email: 'mspugsley@gmail.com',
+        priceRange: '$$',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Antônio Cândido Cavalim, 562',
+          addressLocality: 'Curitiba',
+          addressRegion: 'PR',
+          addressCountry: 'BR'
+        },
+        sameAs: ['https://www.instagram.com/melissapugsley_/'],
+        knowsAbout: ['cabelos', 'mechas', 'coloração', 'micropigmentação', 'micropigmentação reparadora', 'sobrancelhas']
+      },
+      {
+        '@type': 'BeautySalon',
+        '@id': `${siteUrl}#florianopolis`,
+        name: 'Studio Melissa Pugsley — Florianópolis',
+        url: siteUrl,
+        image: imageUrl,
+        telephone: '+55 41 99767-8286',
+        email: 'mspugsley@gmail.com',
+        priceRange: '$$',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Fermino Hermenegildo dos Santos, 364 — Fundos',
+          addressLocality: 'Florianópolis',
+          addressRegion: 'SC',
+          addressCountry: 'BR'
+        },
+        sameAs: ['https://www.instagram.com/melissapugsley_/'],
+        knowsAbout: ['cabelos', 'mechas', 'coloração', 'micropigmentação', 'micropigmentação reparadora', 'sobrancelhas']
+      }
+    ]
+  };
+
+  let jsonLd = document.getElementById('local-business-schema');
+  if (!jsonLd) {
+    jsonLd = document.createElement('script');
+    jsonLd.type = 'application/ld+json';
+    jsonLd.id = 'local-business-schema';
+    document.head.appendChild(jsonLd);
+  }
+  jsonLd.textContent = JSON.stringify(schema);
 })();
