@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nke989-coder.github.io/studio-melissa-pugsley/sitemap.xml
